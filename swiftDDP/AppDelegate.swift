@@ -7,18 +7,30 @@
 //
 
 import UIKit
-
+import ObjectiveDDP
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
+    static var meteor = MeteorClient(ddpVersion: "pre2")
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        AppDelegate.meteor?.ddp = ObjectiveDDP(urlString: "ws://18.224.108.40/websocket", delegate: AppDelegate.meteor!)
+        AppDelegate.meteor?.ddp.connectWebSocket()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.reportConnection), name: NSNotification.Name.MeteorClientDidConnect, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.reportDisconnection), name: NSNotification.Name.MeteorClientDidDisconnect, object: nil)
         return true
     }
-
+    @objc func reportConnection() {
+        print("================> connected to server!")
+    }
+    
+    @objc func reportDisconnection() {
+        print("================> disconnected from server!")
+    }
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
